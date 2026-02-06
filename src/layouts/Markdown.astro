@@ -1,0 +1,16 @@
+---
+import DefaultLayout from "./Default.astro";
+
+interface Props {
+	title: string;
+	description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<DefaultLayout title={title} description={description}>
+	<article class="markdown">
+		<slot />
+	</article>
+</DefaultLayout>

@@ -1,0 +1,23 @@
+---
+import { getCollection } from "astro:content";
+import Journal from "../../layouts/Journal.astro";
+
+export async function getStaticPaths() {
+	const entries = await getCollection("posts");
+	return entries.map((entry) => ({
+		params: { slug: entry.slug },
+		props: { entry },
+	}));
+}
+
+export const prerender = true;
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+---
+
+<Journal frontmatter={entry.data}>
+	<div class="markdown">
+		<Content />
+	</div>
+</Journal>

@@ -1,0 +1,33 @@
+---
+interface Props {
+	href: string;
+	withIcon?: boolean;
+	rel?: string;
+}
+
+const { href, withIcon = true, rel } = Astro.props;
+---
+
+<a
+	href={href}
+	class="inline-flex items-start gap-0.25 underline underline-offset-[0.125em] decoration-muted-foreground decoration-dotted text-foreground hover:decoration-foreground motion-safe:transition-colors motion-safe:duration-200 group"
+	rel={rel}
+>
+	<slot />{
+		href.startsWith("http") && withIcon && (
+			<svg
+				fill="currentColor"
+				focusable="false"
+				shape-rendering="geometricPrecision"
+				stroke="none"
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 24 24"
+				width="16"
+				height="16"
+				class="relative flex-shrink-0 size-[1ch] mt-[0.3rem] opacity-0 group-hover:opacity-100 motion-safe:transition-opacity motion-safe:duration-200"
+			>
+				<path d="m5.4 20.1-1.5-1.5L15.425 7.075h-6.6v-2.15h10.25v10.25h-2.15v-6.6Z" />
+			</svg>
+		)
+	}
+</a>

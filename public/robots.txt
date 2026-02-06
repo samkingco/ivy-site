@@ -1,0 +1,41 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://samking.co/sitemap-index.xml
+
+# LLMs.txt location for AI agents
+# See: https://llmstxt.org/
+Llms-txt: /llms.txt
+
+# RSS feed
+Rss: https://samking.co/rss.xml
+
+# Crawl delay (be nice to my server)
+Crawl-delay: 1
+
+# Block AI scrapers that don't respect robots.txt
+User-agent: GPTBot
+Allow: /llms.txt
+Allow: /robots.txt
+Disallow: /
+
+User-agent: ChatGPT-User
+Allow: /llms.txt
+Allow: /robots.txt
+Disallow: /
+
+User-agent: CCBot
+Allow: /llms.txt
+Allow: /robots.txt
+Disallow: /
+
+User-agent: PerplexityBot
+Allow: /llms.txt
+Allow: /robots.txt
+Disallow: /
+
+User-agent: Claude-Web
+Allow: /llms.txt
+Allow: /robots.txt
+Disallow: /

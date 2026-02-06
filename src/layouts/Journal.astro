@@ -1,0 +1,58 @@
+---
+import { getCollection, getEntry } from "astro:content";
+import Link from "../components/Link.astro";
+import { formatDate } from "../utils/dates";
+import DefaultLayout from "./Default.astro";
+
+const { frontmatter } = Astro.props;
+const { slug } = Astro.params;
+if (!slug) throw new Error("slug is required");
+
+const post = await getEntry("posts", slug);
+if (!post) throw new Error(`Post ${slug} not found`);
+
+const allPosts = await getCollection("posts");
+const posts = allPosts.sort(
+	(a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+
+const currIndex = allPosts.findIndex((post) => post.slug === slug);
+const readNext =
+	currIndex === posts.length - 1 ? posts[0] : posts[currIndex + 1];
+---
+
+<DefaultLayout
+	title={`${frontmatter.title} | Pica`}
+	description={frontmatter.excerpt}
+	ogImage={`/journal/${slug}.og.png`}
+>
+	<article>
+		<header class="mb-3">
+			<p class="text-muted-foreground tabular-nums slashed-zero">
+				{formatDate(frontmatter.date)}
+			</p>
+			<h1 class="font-bold">{frontmatter.title}</h1>
+		</header>
+		<slot />
+	</article>
+
+	<hr class="h-[1px] bg-border border-none" />
+
+	<nav>
+		<p class="text-muted-foreground">Read next</p>
+		<p>
+			<Link href={`/journal/${readNext.slug}`}>{readNext.data.title}</Link>
+		</p>
+	</nav>
+
+	<footer>
+		<p class="text-muted-foreground">View source</p>
+		<p>
+			<Link
+				href={`https://github.com/samkingco/ivy-site/blob/main/${post.filePath ?? ""}`}
+			>
+				Edit on GitHub
+			</Link>
+		</p>
+	</footer>
+</DefaultLayout>

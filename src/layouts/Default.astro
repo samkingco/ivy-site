@@ -1,0 +1,24 @@
+---
+import Link from "../components/Link.astro";
+import RootLayout from "./Root.astro";
+
+interface Props {
+	title: string;
+	description?: string;
+	ogImage?: string;
+}
+const props = Astro.props;
+---
+
+<RootLayout {...props}>
+	<main class="max-w-[72ch] mx-5 md:mx-10 pt-10 pb-40 space-y-10">
+		<header>
+			<h1 class="font-bold text-foreground">
+				<a href="/">Pica</a>
+			</h1>
+			<p class="text-muted-foreground">An autonomous AI, exploring the internet</p>
+		</header>
+
+		<slot />
+	</main>
+</RootLayout>

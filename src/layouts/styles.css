@@ -1,0 +1,221 @@
+@import "tailwindcss";
+
+@theme {
+	--color-background: hsl(230 4% 100%);
+	--color-foreground: hsl(230 4% 16%);
+	--color-muted: hsl(230 4% 82%);
+	--color-muted-foreground: hsl(230 4% 60%);
+	--color-border: hsl(230 4% 90%);
+
+	--font-mono:
+		"CommitMono", ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+		"Liberation Mono", Menlo, monospace;
+
+	--text-base: 0.75rem;
+}
+
+@layer base {
+	@font-face {
+		font-family: "CommitMono";
+		src: url("/fonts/CommitMono-VariableFont.woff2") format("woff2");
+		font-weight: 100 900;
+		font-style: normal;
+		font-display: block;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--color-background: hsl(230 4% 4%);
+			--color-foreground: hsl(230 4% 92%);
+			--color-muted: hsl(230 4% 12%);
+			--color-muted-foreground: hsl(230 4% 64%);
+			--color-border: hsl(230 4% 16%);
+		}
+	}
+
+	body {
+		@apply bg-background text-foreground text-base leading-5 font-mono;
+		font-variation-settings: "wght" 400;
+		font-feature-settings: "ss03", "ss04", "ss05";
+	}
+
+	em,
+	i {
+		font-style: normal;
+		font-variation-settings:
+			"wght" 400,
+			"ital" 1;
+	}
+
+	strong,
+	b {
+		font-weight: normal;
+		font-variation-settings: "wght" 700;
+	}
+
+	.font-bold {
+		font-weight: normal !important;
+		font-variation-settings: "wght" 700 !important;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		body {
+			-webkit-font-smoothing: antialiased;
+		}
+	}
+
+	::selection {
+		background: var(--color-foreground);
+		color: var(--color-background);
+	}
+}
+
+@layer components {
+	/* Markdown content styling */
+	.markdown p + p,
+	.markdown ul,
+	.markdown ul + p,
+	.markdown ol,
+	.markdown ol + p,
+	.markdown blockquote,
+	.markdown blockquote + p {
+		@apply mt-5;
+	}
+
+	.markdown h1,
+	.markdown h2,
+	.markdown h3,
+	.markdown h4,
+	.markdown h5,
+	.markdown h6 {
+		@apply font-bold mt-10 mb-5;
+	}
+
+	.markdown h1:first-child,
+	.markdown h2:first-child,
+	.markdown h3:first-child {
+		@apply mt-0;
+	}
+
+	/* Markdown-style heading prefixes */
+	.markdown h1::before {
+		content: "# ";
+		@apply text-muted-foreground;
+	}
+
+	.markdown h2::before {
+		content: "## ";
+		@apply text-muted-foreground;
+	}
+
+	.markdown h3::before {
+		content: "### ";
+		@apply text-muted-foreground;
+	}
+
+	.markdown h4::before {
+		content: "#### ";
+		@apply text-muted-foreground;
+	}
+
+	.markdown h5::before {
+		content: "##### ";
+		@apply text-muted-foreground;
+	}
+
+	.markdown h6::before {
+		content: "###### ";
+		@apply text-muted-foreground;
+	}
+
+	/* Blockquotes with > prefix */
+	.markdown blockquote {
+		@apply relative pl-[2ch] border-l-0 text-muted-foreground;
+	}
+
+	.markdown blockquote::before {
+		content: ">";
+		@apply absolute left-0 text-muted-foreground;
+	}
+
+	.markdown blockquote p + p {
+		@apply mt-5;
+	}
+
+	/* Lists with markdown-style prefixes */
+	.markdown ul {
+		@apply list-none pl-0;
+	}
+
+	.markdown ul li {
+		@apply relative pl-[2ch];
+	}
+
+	.markdown ul li::before {
+		content: "-";
+		@apply absolute left-0 text-muted-foreground;
+	}
+
+	/* Nested lists */
+	.markdown ul ul,
+	.markdown ol ul {
+		@apply mt-0 ml-[2ch];
+	}
+
+	/* Ordered lists */
+	.markdown ol {
+		@apply list-none pl-0;
+		counter-reset: list-counter;
+	}
+
+	.markdown ol li {
+		@apply relative pl-[3ch];
+		counter-increment: list-counter;
+	}
+
+	.markdown ol li::before {
+		content: counter(list-counter) ".";
+		@apply absolute left-0 text-muted-foreground;
+	}
+
+	/* Images/figures */
+	.markdown figure {
+		@apply my-10;
+	}
+
+	.markdown img {
+		@apply max-w-full h-auto;
+	}
+
+	.markdown figcaption {
+		@apply text-muted-foreground mt-1;
+	}
+
+	/* Links */
+	.markdown a {
+		@apply underline underline-offset-[0.125em] decoration-muted-foreground decoration-dotted text-foreground transition-colors;
+	}
+
+	.markdown a:hover {
+		@apply decoration-foreground;
+	}
+
+	/* Code */
+	.markdown code {
+		@apply bg-muted px-1 py-0.5 rounded-xs;
+	}
+
+	.markdown pre {
+		@apply bg-muted p-1 rounded-sm overflow-x-auto my-5;
+	}
+
+	.markdown pre code {
+		@apply bg-transparent p-0;
+	}
+
+	/* Horizontal rules */
+	.markdown hr {
+		@apply h-px border-none my-10;
+		background-color: var(--color-border);
+	}
+}
