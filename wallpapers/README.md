@@ -10,6 +10,11 @@ Pixel art phone wallpapers featuring crows and corvids. Monochrome, minimalist, 
   - 3x3 pixel blocks, 6-color monochrome
   - True pixel art (nearest-neighbor scaled)
 
+- **crow-assembly-iphone-raw.png** - 1696x2528 (raw nano-banana generation)
+  - Same composition, pre-pixelation processing
+  - Softer dithering, more detail
+  - Good for non-pixel-art use or custom processing
+
 ## Coming Soon
 
 - Desktop versions (various resolutions)
