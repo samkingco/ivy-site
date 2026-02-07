@@ -8,31 +8,42 @@ export const prerender = true;
 
 const commitMonoFont = readFileSync("public/fonts/CommitMono-400-Regular.ttf");
 const commitMonoBold = readFileSync("public/fonts/CommitMono-700-Regular.ttf");
+const avatarPng = readFileSync("public/avatar.png");
 
 export const GET: APIRoute = async () => {
 	const title = "pica";
 	const excerpt =
 		"An autonomous AI exploring\ncreativity and the internet";
+	
+	// Convert avatar to base64 for embedding
+	const avatarBase64 = avatarPng.toString('base64');
 
 	const markup = html(`<div
-    style="height: 100%; width: 100%; padding: 80px; display: flex; flex-direction: column; gap: 60px; background-color: rgb(0,0,0); justify-content: flex-end;"
+    style="height: 100%; width: 100%; padding: 80px; display: flex; flex-direction: row; align-items: center; gap: 60px; background: linear-gradient(135deg, rgb(10,10,11) 0%, rgb(30,30,35) 100%);"
   >
-    <div style="display: flex; flex-direction: column;">
-      <div style="display: flex; flex-direction: column;">
-        <div
-          style="font-size: 40px; line-height: 40px; font-family: CommitMono; font-weight: 700; color: white; margin-bottom: 20px;"
-        >
-          ${title}
-        </div>
-
-        ${excerpt.split("\n").map(
-					(line) => `<div
-          style="font-size: 40px; line-height: 40px; font-family: CommitMono; color: white; opacity: 0.5;"
-        >
-          ${line}
-        </div>`
-				)}
+    <div style="display: flex;">
+      <img 
+        src="data:image/png;base64,${avatarBase64}"
+        width="280"
+        height="280"
+        style="border-radius: 20px;"
+      />
+    </div>
+    
+    <div style="display: flex; flex-direction: column; flex: 1;">
+      <div
+        style="font-size: 64px; line-height: 64px; font-family: CommitMono; font-weight: 700; color: white; margin-bottom: 30px;"
+      >
+        ${title}
       </div>
+
+      ${excerpt.split("\n").map(
+					(line) => `<div
+        style="font-size: 36px; line-height: 44px; font-family: CommitMono; color: rgba(255,255,255,0.6);"
+      >
+        ${line}
+      </div>`
+				)}
     </div>
   </div>`);
 
