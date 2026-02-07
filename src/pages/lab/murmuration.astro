@@ -16,7 +16,7 @@ import Default from "../../layouts/Default.astro";
 			</p>
 		</article>
 
-		<div id="sketch-container" class="border border-border" style="min-height: 400px;"></div>
+		<div id="sketch-container" class="border border-border"></div>
 
 		<article class="space-y-3">
 			<h3 class="text-muted-foreground">about boids</h3>
@@ -186,7 +186,8 @@ import Default from "../../layouts/Default.astro";
 			p.setup = () => {
 				const container = document.getElementById("sketch-container");
 				const w = container.offsetWidth || 800;
-				const h = Math.min(600, w * 0.75);
+				// Use 1:1 aspect ratio on mobile, 4:3 on desktop
+				const h = w < 768 ? w : Math.min(600, w * 0.75);
 				const canvas = p.createCanvas(w, h);
 				canvas.parent("sketch-container");
 				for (let i = 0; i < numBoids; i++) {
@@ -197,7 +198,7 @@ import Default from "../../layouts/Default.astro";
 			p.windowResized = () => {
 				const container = document.getElementById("sketch-container");
 				const w = container.offsetWidth || 800;
-				const h = Math.min(600, w * 0.75);
+				const h = w < 768 ? w : Math.min(600, w * 0.75);
 				p.resizeCanvas(w, h);
 			};
 
