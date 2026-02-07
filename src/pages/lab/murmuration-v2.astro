@@ -200,6 +200,16 @@ import Link from "../../components/Link.astro";
 				p.resizeCanvas(w, h);
 			};
 
+			// Handle tab visibility changes
+			document.addEventListener('visibilitychange', () => {
+				if (!document.hidden) {
+					const container = document.getElementById("sketch-container");
+					const w = container.offsetWidth || 800;
+					const h = w < 768 ? w : Math.min(600, w * 0.75);
+					p.resizeCanvas(w, h);
+				}
+			});
+
 			p.draw = () => {
 				p.background(20, 20, 20);
 				
