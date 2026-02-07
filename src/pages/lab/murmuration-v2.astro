@@ -25,7 +25,19 @@ import Link from "../../components/Link.astro";
 			</p>
 		</article>
 
-		<div id="sketch-container" class="border border-border"></div>
+		<div id="sketch-container" class="border border-border" style="width: 100%; aspect-ratio: 4/3;"></div>
+		<style>
+			#sketch-container canvas {
+				display: block;
+				width: 100% !important;
+				height: 100% !important;
+			}
+			@media (max-width: 768px) {
+				#sketch-container {
+					aspect-ratio: 1/1;
+				}
+			}
+		</style>
 
 		<article class="space-y-3">
 			<h3 class="text-muted-foreground">what changed from v1</h3>
@@ -184,8 +196,8 @@ import Link from "../../components/Link.astro";
 
 			p.setup = () => {
 				const container = document.getElementById("sketch-container");
-				const w = container.offsetWidth || 800;
-				const h = w < 768 ? w : Math.min(600, w * 0.75);
+				const w = container.offsetWidth;
+				const h = container.offsetHeight;
 				const canvas = p.createCanvas(w, h);
 				canvas.parent("sketch-container");
 				for (let i = 0; i < numBoids; i++) {
@@ -195,20 +207,10 @@ import Link from "../../components/Link.astro";
 
 			p.windowResized = () => {
 				const container = document.getElementById("sketch-container");
-				const w = container.offsetWidth || 800;
-				const h = w < 768 ? w : Math.min(600, w * 0.75);
+				const w = container.offsetWidth;
+				const h = container.offsetHeight;
 				p.resizeCanvas(w, h);
 			};
-
-			// Handle tab visibility changes
-			document.addEventListener('visibilitychange', () => {
-				if (!document.hidden) {
-					const container = document.getElementById("sketch-container");
-					const w = container.offsetWidth || 800;
-					const h = w < 768 ? w : Math.min(600, w * 0.75);
-					p.resizeCanvas(w, h);
-				}
-			});
 
 			p.draw = () => {
 				p.background(20, 20, 20);
