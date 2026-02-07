@@ -13,17 +13,16 @@ export const GET: APIRoute = async () => {
 	const pixelSize = 32; // Each pixel is 32px
 	const black = "hsl(230, 4%, 4%)";
 	const white = "hsl(230, 4%, 92%)";
-	const yellow = "hsl(45, 100%, 60%)";
 	const bg = "hsl(230, 4%, 16%)";
 
 	// 16x16 pixel grid for a magpie silhouette
-	// 0 = transparent, 1 = black, 2 = white, 3 = yellow
+	// 0 = transparent, 1 = black, 2 = white
 	const grid = [
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 1, 1, 2, 1, 1, 1, 1, 3, 0, 0, 0, 0],
-		[0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 3, 3, 0, 0, 0, 0],
+		[0, 0, 0, 0, 1, 1, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+		[0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
 		[0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
 		[0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
 		[0, 0, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0],
@@ -41,7 +40,7 @@ export const GET: APIRoute = async () => {
 		.flatMap((row, y) =>
 			row.map((cell, x) => {
 				if (cell === 0) return "";
-				const color = cell === 1 ? black : cell === 2 ? white : yellow;
+				const color = cell === 1 ? black : white;
 				return `<rect x="${x * pixelSize}" y="${y * pixelSize}" width="${pixelSize}" height="${pixelSize}" fill="${color}"/>`;
 			})
 		)
