@@ -9,31 +9,50 @@ export const prerender = true;
 const commitMonoBold = readFileSync("public/fonts/CommitMono-700-Regular.ttf");
 
 export const GET: APIRoute = async () => {
-	// Simple geometric magpie silhouette - very minimal
+	// Pixel art magpie - 16x16 grid, scaled up
+	const pixelSize = 32; // Each pixel is 32px
+	const black = "hsl(230, 4%, 4%)";
+	const white = "hsl(230, 4%, 92%)";
+	const yellow = "hsl(45, 100%, 60%)";
+	const bg = "hsl(230, 4%, 16%)";
+
+	// 16x16 pixel grid for a magpie silhouette
+	// 0 = transparent, 1 = black, 2 = white, 3 = yellow
+	const grid = [
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 1, 1, 2, 1, 1, 1, 1, 3, 0, 0, 0, 0],
+		[0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 3, 3, 0, 0, 0, 0],
+		[0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+		[0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+		[0, 0, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+		[0, 0, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 0, 0, 0],
+		[0, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 0, 0, 0],
+		[0, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+		[0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	];
+
+	const pixels = grid
+		.flatMap((row, y) =>
+			row.map((cell, x) => {
+				if (cell === 0) return "";
+				const color = cell === 1 ? black : cell === 2 ? white : yellow;
+				return `<rect x="${x * pixelSize}" y="${y * pixelSize}" width="${pixelSize}" height="${pixelSize}" fill="${color}"/>`;
+			})
+		)
+		.filter(Boolean)
+		.join("\n");
+
 	const markup = html(`<div
-    style="height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; background-color: hsl(230, 4%, 16%);"
+    style="height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; background-color: ${bg};"
   >
-    <svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-      <!-- Tail -->
-      <ellipse cx="80" cy="280" rx="60" ry="80" fill="hsl(230, 4%, 4%)" transform="rotate(-25 80 280)" />
-      
-      <!-- Body -->
-      <ellipse cx="200" cy="240" rx="120" ry="140" fill="hsl(230, 4%, 4%)" />
-      
-      <!-- White belly patch -->
-      <ellipse cx="200" cy="260" rx="70" ry="80" fill="hsl(230, 4%, 92%)" />
-      
-      <!-- Head -->
-      <circle cx="200" cy="130" r="80" fill="hsl(230, 4%, 4%)" />
-      
-      <!-- Beak -->
-      <polygon points="250,130 290,120 250,140" fill="hsl(45, 100%, 60%)" />
-      
-      <!-- Eye white -->
-      <circle cx="230" cy="115" r="16" fill="hsl(230, 4%, 92%)" />
-      
-      <!-- Eye pupil -->
-      <circle cx="230" cy="115" r="6" fill="hsl(230, 4%, 4%)" />
+    <svg width="${16 * pixelSize}" height="${16 * pixelSize}" viewBox="0 0 ${16 * pixelSize} ${16 * pixelSize}" xmlns="http://www.w3.org/2000/svg">
+      ${pixels}
     </svg>
   </div>`);
 
