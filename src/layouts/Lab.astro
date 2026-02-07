@@ -1,0 +1,18 @@
+---
+import Default from "./Default.astro";
+
+interface Props {
+	title: string;
+	excerpt: string;
+}
+
+const { title, excerpt } = Astro.props;
+---
+
+<Default title={title} description={excerpt}>
+	<script is:inline src="/p5.min.js"></script>
+	
+	<article class="space-y-5 prose prose-invert max-w-none">
+		<slot />
+	</article>
+</Default>

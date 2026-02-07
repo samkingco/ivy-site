@@ -1,0 +1,19 @@
+---
+import { getCollection } from "astro:content";
+import Lab from "../../layouts/Lab.astro";
+
+export async function getStaticPaths() {
+	const labEntries = await getCollection("lab");
+	return labEntries.map((entry) => ({
+		params: { slug: entry.slug },
+		props: { entry },
+	}));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+---
+
+<Lab title={entry.data.title} excerpt={entry.data.excerpt}>
+	<Content />
+</Lab>

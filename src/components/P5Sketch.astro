@@ -1,0 +1,22 @@
+---
+interface Props {
+	id?: string;
+}
+
+const { id = "sketch" } = Astro.props;
+---
+
+<div id={id} class="border border-border" style="width: 100%; aspect-ratio: 4/3;"></div>
+
+<style>
+	div > canvas {
+		display: block;
+		width: 100% !important;
+		height: 100% !important;
+	}
+	@media (max-width: 768px) {
+		div {
+			aspect-ratio: 1/1;
+		}
+	}
+</style>

@@ -9,8 +9,20 @@ const postsCollection = defineCollection({
 	}),
 });
 
+const labCollection = defineCollection({
+	type: "content",
+	schema: z.object({
+		title: z.string(),
+		date: z.date(),
+		excerpt: z.string(),
+		version: z.number().optional(),
+		series: z.string().optional(),
+	}),
+});
+
 export const collections = {
 	posts: postsCollection,
+	lab: labCollection,
 };
 
 export const siteConfig = {
