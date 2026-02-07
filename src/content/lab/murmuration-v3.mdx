@@ -1,37 +1,38 @@
 ---
-title: murmuration v2
+title: murmuration v3
 date: 2026-02-06
-excerpt: boids with topological neighbors — each bird tracks its 7 nearest neighbors
-version: 2
+excerpt: interactive influence — mouse becomes friend or foe based on movement
+version: 3
 series: murmuration
 ---
 
 import P5Sketch from "../../components/P5Sketch.astro";
 import Link from "../../components/Link.astro";
 
-## murmuration v2: topological neighbors
+## murmuration v3: dynamic interaction
 
-<Link href="/lab/murmuration-v1">v1</Link> · v2 · <Link href="/lab/murmuration-v3">v3</Link>
+<Link href="/lab/murmuration-v1">v1</Link> · <Link href="/lab/murmuration-v2">v2</Link> · v3
 
-real starlings don't use a fixed perception radius. instead, each bird 
-tracks a specific number of neighbors (around 6-7) regardless of distance. 
-this is called "topological distance" — measured in number of birds, not meters.
+instead of the mouse always being a predator, it now responds to how you move:
 
-this makes the flock more cohesive in sparse areas (birds track further 
-away) and prevents overcrowding in dense areas (only paying attention to 
-nearest neighbors).
+- **move slowly** → birds are attracted (curious friend)
+- **move quickly** → birds flee (threat/predator)
+- **stay still** → birds lose interest, return to natural flocking
 
-move your mouse — the flock still avoids you like a predator.
+this lets you see both the natural murmuration patterns and how you can influence the flock through movement.
 
-<P5Sketch id="murmuration-v2" />
+<P5Sketch id="murmuration-v3" />
 
 <script type="module">
-const container = document.getElementById("murmuration-v2");
+const container = document.getElementById("murmuration-v3");
 if (container) {
 	const sketch = new p5((p) => {
 		const boids = [];
 		const numBoids = 150;
 		const topologicalNeighbors = 7;
+		let prevMouseX = 0;
+		let prevMouseY = 0;
+		let mouseSpeed = 0;
 		
 		class Boid {
 			constructor() {
@@ -117,7 +118,7 @@ if (container) {
 				return steering;
 			}
 
-			avoid(target) {
+			interact(target, speed) {
 				let steering = p.createVector();
 				let d = p.dist(
 					this.position.x,
@@ -125,29 +126,44 @@ if (container) {
 					target.x,
 					target.y
 				);
-				if (d < 100) {
-					let diff = p5.Vector.sub(this.position, target);
-					diff.div(d * d);
-					steering.add(diff);
-					steering.setMag(this.maxSpeed * 2);
-					steering.sub(this.velocity);
-					steering.limit(this.maxForce * 3);
+				
+				// Speed threshold: slow movement = attraction, fast = avoidance
+				const speedThreshold = 10;
+				const influenceRadius = 150;
+				
+				if (d < influenceRadius && speed > 0.5) {
+					if (speed < speedThreshold) {
+						// Slow movement - attraction (curious)
+						let diff = p5.Vector.sub(target, this.position);
+						diff.setMag(this.maxSpeed * 0.5);
+						steering = diff.sub(this.velocity);
+						steering.limit(this.maxForce * 0.8);
+					} else {
+						// Fast movement - avoidance (threat)
+						let diff = p5.Vector.sub(this.position, target);
+						diff.div(d * d);
+						steering.add(diff);
+						steering.setMag(this.maxSpeed * 2);
+						steering.sub(this.velocity);
+						steering.limit(this.maxForce * 3);
+					}
 				}
+				// If still or far away, no interaction
 				return steering;
 			}
 
-			flock(boids, predator) {
+			flock(boids, target, speed) {
 				const neighbors = this.getNearestNeighbors(boids);
 				
 				let alignment = this.align(neighbors);
 				let cohesion = this.cohesion(neighbors);
 				let separation = this.separation(neighbors);
-				let avoidance = this.avoid(predator);
+				let interaction = this.interact(target, speed);
 
 				this.acceleration.add(alignment);
 				this.acceleration.add(cohesion);
 				this.acceleration.add(separation);
-				this.acceleration.add(avoidance);
+				this.acceleration.add(interaction);
 			}
 
 			update() {
@@ -168,10 +184,12 @@ if (container) {
 			const w = container.offsetWidth;
 			const h = container.offsetHeight;
 			const canvas = p.createCanvas(w, h);
-			canvas.parent("murmuration-v2");
+			canvas.parent("murmuration-v3");
 			for (let i = 0; i < numBoids; i++) {
 				boids.push(new Boid());
 			}
+			prevMouseX = p.mouseX;
+			prevMouseY = p.mouseY;
 		};
 
 		p.windowResized = () => {
@@ -182,10 +200,19 @@ if (container) {
 
 		p.draw = () => {
 			p.background(20, 20, 20);
-			const predator = p.createVector(p.mouseX, p.mouseY);
+			
+			// Calculate mouse speed
+			const dx = p.mouseX - prevMouseX;
+			const dy = p.mouseY - prevMouseY;
+			mouseSpeed = p.sqrt(dx * dx + dy * dy);
+			prevMouseX = p.mouseX;
+			prevMouseY = p.mouseY;
+			
+			const mouse = p.createVector(p.mouseX, p.mouseY);
+			
 			for (let boid of boids) {
 				boid.edges();
-				boid.flock(boids, predator);
+				boid.flock(boids, mouse, mouseSpeed);
 				boid.update();
 				boid.show();
 			}
@@ -198,12 +225,13 @@ if (container) {
 }
 </script>
 
-### what changed from v1
+### what changed from v2
 
-- **v1:** fixed 50px perception radius for all birds
-- **v2:** each bird tracks 7 nearest neighbors, regardless of distance
+- **v1:** mouse always avoids (predator)
+- **v2:** topological neighbors (7 nearest)
+- **v3:** mouse interaction depends on speed
+  - slow movement → birds attracted (curious, treating you as friend)
+  - fast movement → birds flee (threat response)
+  - no movement → birds ignore you, natural flocking resumes
 
-this is based on 2008 research (ballerini et al.) that found starlings 
-interact with a fixed number of topological neighbors rather than metric 
-distance. makes the flock behave more realistically — tighter coordination, 
-less straggling.
+this makes the interaction more nuanced and lets you see the difference between natural murmuration behavior and influenced patterns. try moving your mouse slowly through the flock vs. quick movements.
