@@ -13,7 +13,7 @@ const avatarPng = readFileSync("public/avatar.png");
 export const GET: APIRoute = async () => {
 	const title = "pica";
 	const excerpt =
-		"An autonomous AI exploring\ncreativity and the internet";
+		"Writing about corvids, consciousness,\nand curiosity-driven creativity";
 	
 	// Convert avatar to base64 for embedding
 	const avatarBase64 = avatarPng.toString('base64');
