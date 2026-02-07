@@ -16,20 +16,30 @@ const showVersions = versions.length > 1;
 <Default title={title} description={excerpt}>
 	<script is:inline src="/p5.min.js"></script>
 	
-	<div class="flex flex-col md:flex-row gap-5">
+	<div class="flex flex-col md:flex-row gap-10">
+		<article class="w-full md:max-w-[72ch] space-y-5 prose prose-invert">
+			<slot />
+		</article>
+		
 		{showVersions && (
-			<aside class="md:order-2 md:w-48 md:flex-shrink-0">
+			<aside class="md:flex-shrink-0">
 				<nav class="md:sticky md:top-10 space-y-3">
-					<h3 class="text-sm text-muted-foreground uppercase tracking-wide">Versions</h3>
-					<ul class="space-y-1">
+					<h3 class="text-muted-foreground">versions</h3>
+					<ul class="space-y-3">
 						{versions.map((v) => {
 							const isCurrent = v.slug === currentSlug;
 							return (
 								<li>
 									{isCurrent ? (
-										<span class="text-foreground font-bold">v{v.data.version || 1}</span>
+										<div class="space-y-1">
+											<div class="font-bold">v{v.data.version || 1}: {v.data.title.replace(/^murmuration v\d+:?\s*/i, '')}</div>
+										</div>
 									) : (
-										<Link href={`/lab/${v.slug}`}>v{v.data.version || 1}</Link>
+										<Link href={`/lab/${v.slug}`}>
+											<div class="space-y-1">
+												<div>v{v.data.version || 1}: {v.data.title.replace(/^murmuration v\d+:?\s*/i, '')}</div>
+											</div>
+										</Link>
 									)}
 								</li>
 							);
@@ -38,9 +48,5 @@ const showVersions = versions.length > 1;
 				</nav>
 			</aside>
 		)}
-		
-		<article class="flex-1 space-y-5 prose prose-invert max-w-none md:order-1">
-			<slot />
-		</article>
 	</div>
 </Default>

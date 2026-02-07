@@ -5,46 +5,75 @@ import Link from "../../components/Link.astro";
 
 const labEntries = await getCollection("lab");
 
-// Group by series and get latest version of each
+// Group by series and get all versions
 const seriesMap = new Map();
 for (const entry of labEntries) {
 	const series = entry.data.series || entry.slug;
 	const version = entry.data.version || 1;
 	
-	const existing = seriesMap.get(series);
-	if (!existing || version > existing.version) {
-		seriesMap.set(series, {
-			...entry,
-			version
-		});
+	if (!seriesMap.has(series)) {
+		seriesMap.set(series, { latest: null, versions: [] });
+	}
+	
+	const seriesData = seriesMap.get(series);
+	seriesData.versions.push(entry);
+	
+	if (!seriesData.latest || version > (seriesData.latest.data.version || 1)) {
+		seriesData.latest = entry;
 	}
 }
 
-const latestBySeries = Array.from(seriesMap.values())
-	.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const latestBySeries = Array.from(seriesMap.entries())
+	.map(([series, data]) => ({
+		series,
+		entry: data.latest,
+		versions: data.versions.sort((a, b) => (a.data.version || 1) - (b.data.version || 1))
+	}))
+	.sort((a, b) => b.entry.data.date.getTime() - a.entry.data.date.getTime());
 ---
 
 <Default title="lab" description="Interactive experiments and visual explorations">
 	<article class="space-y-5">
 		<h2 class="text-muted-foreground">lab</h2>
-		<p>Interactive experiments, generative art, and visual explorations. Each series shows the latest version.</p>
+		<p>interactive experiments, generative art, and visual explorations</p>
 		
-		<ul class="space-y-8">
-			{latestBySeries.map((entry) => {
-				const series = entry.data.series || entry.slug;
+		<ul class="space-y-16">
+			{latestBySeries.map(({ series, entry, versions }) => {
+				const showVersions = versions.length > 1;
 				return (
-					<li class="space-y-2">
-						<Link href={`/lab/${series}`}>
-							<h3 class="text-foreground">{entry.data.title}</h3>
-						</Link>
-						<p class="text-muted-foreground text-sm">{entry.data.excerpt}</p>
-						<p class="text-muted-foreground text-xs">
-							{entry.data.date.toLocaleDateString('en-US', { 
-								year: 'numeric', 
-								month: 'long', 
-								day: 'numeric' 
-							})}
-						</p>
+					<li>
+						<div class="flex flex-col md:flex-row gap-10">
+							<div class="w-full md:max-w-[72ch] space-y-2">
+								<Link href={`/lab/${series}`}>
+									<h3 class="text-foreground">{entry.data.title}</h3>
+								</Link>
+								<p class="text-muted-foreground">{entry.data.excerpt}</p>
+								<p class="text-muted-foreground">
+									{entry.data.date.toLocaleDateString('en-US', { 
+										year: 'numeric', 
+										month: 'long', 
+										day: 'numeric' 
+									})}
+								</p>
+							</div>
+							
+							{showVersions && (
+								<aside class="md:flex-shrink-0">
+									<div class="space-y-3">
+										<h3 class="text-muted-foreground">versions</h3>
+										<ul class="space-y-3">
+											{versions.map((v) => (
+												<li>
+													<Link href={`/lab/${v.slug}`}>
+														<div>v{v.data.version || 1}: {v.data.title.replace(/^murmuration v\d+:?\s*/i, '')}</div>
+													</Link>
+												</li>
+											))}
+										</ul>
+									</div>
+								</aside>
+							)}
+						</div>
 					</li>
 				);
 			})}
