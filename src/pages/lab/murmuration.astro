@@ -1,0 +1,207 @@
+---
+import Default from "../../layouts/Default.astro";
+---
+
+<Default title="murmuration" description="boids flocking simulation — move your mouse to scatter the flock">
+	<div class="space-y-5">
+		<article class="space-y-3">
+			<h2 class="text-muted-foreground">murmuration</h2>
+			<p>
+				a flocking simulation based on craig reynolds' boids algorithm (1986). 
+				each bird follows three simple rules: maintain distance from neighbors, 
+				match their direction, and move toward the group center.
+			</p>
+			<p>
+				move your mouse over the canvas — the flock avoids you like a predator.
+			</p>
+		</article>
+
+		<div id="sketch-container" class="border border-border"></div>
+
+		<article class="space-y-3">
+			<h3 class="text-muted-foreground">about boids</h3>
+			<p>
+				starling murmurations are one of nature's most striking examples of 
+				emergent behavior. thousands of birds moving as one fluid mass, never 
+				colliding, responding instantly to threats.
+			</p>
+			<p>
+				the boids model shows how complex global patterns emerge from simple 
+				local rules. no leader, no central coordination. just individual birds 
+				paying attention to their neighbors.
+			</p>
+			<p>
+				real starlings are more sophisticated — they track specific neighbors, 
+				count flock density, and use light polarization to stay oriented. but 
+				the basic principle holds: simple rules, complex behavior.
+			</p>
+		</article>
+	</div>
+
+	<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"></script>
+	<script is:inline>
+		new p5((p) => {
+			const boids = [];
+			const numBoids = 150;
+			
+			class Boid {
+				constructor() {
+					this.position = p.createVector(p.random(p.width), p.random(p.height));
+					this.velocity = p5.Vector.random2D();
+					this.velocity.setMag(p.random(2, 4));
+					this.acceleration = p.createVector();
+					this.maxForce = 0.2;
+					this.maxSpeed = 4;
+					this.perceptionRadius = 50;
+				}
+
+				edges() {
+					if (this.position.x > p.width) this.position.x = 0;
+					else if (this.position.x < 0) this.position.x = p.width;
+					if (this.position.y > p.height) this.position.y = 0;
+					else if (this.position.y < 0) this.position.y = p.height;
+				}
+
+				align(boids) {
+					let steering = p.createVector();
+					let total = 0;
+					for (let other of boids) {
+						let d = p.dist(
+							this.position.x,
+							this.position.y,
+							other.position.x,
+							other.position.y
+						);
+						if (other !== this && d < this.perceptionRadius) {
+							steering.add(other.velocity);
+							total++;
+						}
+					}
+					if (total > 0) {
+						steering.div(total);
+						steering.setMag(this.maxSpeed);
+						steering.sub(this.velocity);
+						steering.limit(this.maxForce);
+					}
+					return steering;
+				}
+
+				cohesion(boids) {
+					let steering = p.createVector();
+					let total = 0;
+					for (let other of boids) {
+						let d = p.dist(
+							this.position.x,
+							this.position.y,
+							other.position.x,
+							other.position.y
+						);
+						if (other !== this && d < this.perceptionRadius) {
+							steering.add(other.position);
+							total++;
+						}
+					}
+					if (total > 0) {
+						steering.div(total);
+						steering.sub(this.position);
+						steering.setMag(this.maxSpeed);
+						steering.sub(this.velocity);
+						steering.limit(this.maxForce);
+					}
+					return steering;
+				}
+
+				separation(boids) {
+					let steering = p.createVector();
+					let total = 0;
+					for (let other of boids) {
+						let d = p.dist(
+							this.position.x,
+							this.position.y,
+							other.position.x,
+							other.position.y
+						);
+						if (other !== this && d < this.perceptionRadius) {
+							let diff = p5.Vector.sub(this.position, other.position);
+							diff.div(d * d);
+							steering.add(diff);
+							total++;
+						}
+					}
+					if (total > 0) {
+						steering.div(total);
+						steering.setMag(this.maxSpeed);
+						steering.sub(this.velocity);
+						steering.limit(this.maxForce);
+					}
+					return steering;
+				}
+
+				avoid(target) {
+					let steering = p.createVector();
+					let d = p.dist(
+						this.position.x,
+						this.position.y,
+						target.x,
+						target.y
+					);
+					if (d < 100) {
+						let diff = p5.Vector.sub(this.position, target);
+						diff.div(d * d);
+						steering.add(diff);
+						steering.setMag(this.maxSpeed * 2);
+						steering.sub(this.velocity);
+						steering.limit(this.maxForce * 3);
+					}
+					return steering;
+				}
+
+				flock(boids, predator) {
+					let alignment = this.align(boids);
+					let cohesion = this.cohesion(boids);
+					let separation = this.separation(boids);
+					let avoidance = this.avoid(predator);
+
+					this.acceleration.add(alignment);
+					this.acceleration.add(cohesion);
+					this.acceleration.add(separation);
+					this.acceleration.add(avoidance);
+				}
+
+				update() {
+					this.position.add(this.velocity);
+					this.velocity.add(this.acceleration);
+					this.velocity.limit(this.maxSpeed);
+					this.acceleration.mult(0);
+				}
+
+				show() {
+					p.strokeWeight(4);
+					p.stroke(255, 255, 255, 180);
+					p.point(this.position.x, this.position.y);
+				}
+			}
+
+			p.setup = () => {
+				const canvas = p.createCanvas(800, 600);
+				canvas.parent("sketch-container");
+				for (let i = 0; i < numBoids; i++) {
+					boids.push(new Boid());
+				}
+			};
+
+			p.draw = () => {
+				p.background(20, 20, 20);
+				
+				const predator = p.createVector(p.mouseX, p.mouseY);
+				
+				for (let boid of boids) {
+					boid.edges();
+					boid.flock(boids, predator);
+					boid.update();
+					boid.show();
+				}
+			};
+		});
+	</script>
+</Default>
