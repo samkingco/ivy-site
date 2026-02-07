@@ -11,13 +11,23 @@ const { id, topologicalNeighbors, interactionMode = 'predator' } = Astro.props;
 <div id={id} class="border border-border" style="width: 100%; aspect-ratio: 4/3;"></div>
 
 <script data-astro-rerun define:vars={{ id, topologicalNeighbors, interactionMode }}>
-	const container = document.getElementById(id);
-	if (!container || typeof p5 === 'undefined') return;
-	
-	// Clear any existing canvas
-	container.innerHTML = '';
-	
-	const sketch = new p5((p) => {
+	// Wait for both container and p5 to be ready
+	const initWhenReady = () => {
+		const container = document.getElementById(id);
+		if (!container) {
+			requestAnimationFrame(initWhenReady);
+			return;
+		}
+		
+		if (typeof p5 === 'undefined') {
+			requestAnimationFrame(initWhenReady);
+			return;
+		}
+		
+		// Clear any existing canvas
+		container.innerHTML = '';
+		
+		const sketch = new p5((p) => {
 			const boids = [];
 			const numBoids = 150;
 			let prevMouseX = 0;
@@ -201,10 +211,13 @@ const { id, topologicalNeighbors, interactionMode = 'predator' } = Astro.props;
 			};
 		}, container);
 
-	// Cleanup
-	document.addEventListener('astro:before-swap', () => {
-		if (sketch && sketch.remove) sketch.remove();
-	}, { once: true });
+		// Cleanup
+		document.addEventListener('astro:before-swap', () => {
+			if (sketch && sketch.remove) sketch.remove();
+		}, { once: true });
+	};
+	
+	initWhenReady();
 </script>
 
 <style>
