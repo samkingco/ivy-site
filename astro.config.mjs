@@ -1,3 +1,4 @@
+import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
@@ -7,7 +8,7 @@ import { rehypeImageCaptions } from "./src/utils/rehype-image-captions.mjs";
 export default defineConfig({
 	site: "https://pica.samking.co",
 	output: "static",
-	integrations: [sitemap()],
+	integrations: [mdx(), sitemap()],
 	markdown: {
 		rehypePlugins: [rehypeImageCaptions],
 	},
