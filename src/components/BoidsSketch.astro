@@ -1,0 +1,232 @@
+---
+interface Props {
+	id: string;
+	topologicalNeighbors?: number;
+	interactionMode?: 'predator' | 'dynamic';
+}
+
+const { id, topologicalNeighbors, interactionMode = 'predator' } = Astro.props;
+---
+
+<div id={id} class="border border-border" style="width: 100%; aspect-ratio: 4/3;"></div>
+
+<script define:vars={{ id, topologicalNeighbors, interactionMode }}>
+	const initSketch = () => {
+		const container = document.getElementById(id);
+		if (!container || typeof p5 === 'undefined') return;
+		
+		// Clear any existing canvas
+		container.innerHTML = '';
+		
+		const sketch = new p5((p) => {
+			const boids = [];
+			const numBoids = 150;
+			let prevMouseX = 0;
+			let prevMouseY = 0;
+			let mouseSpeed = 0;
+			
+			class Boid {
+				constructor() {
+					this.position = p.createVector(p.random(p.width), p.random(p.height));
+					this.velocity = p5.Vector.random2D();
+					this.velocity.setMag(p.random(2, 4));
+					this.acceleration = p.createVector();
+					this.maxForce = 0.2;
+					this.maxSpeed = 4;
+					this.perceptionRadius = topologicalNeighbors ? null : 50;
+				}
+
+				edges() {
+					if (this.position.x > p.width) this.position.x = 0;
+					else if (this.position.x < 0) this.position.x = p.width;
+					if (this.position.y > p.height) this.position.y = 0;
+					else if (this.position.y < 0) this.position.y = p.height;
+				}
+
+				getNearestNeighbors(boids) {
+					const distances = [];
+					for (let other of boids) {
+						if (other === this) continue;
+						const d = p.dist(this.position.x, this.position.y, other.position.x, other.position.y);
+						distances.push({ boid: other, distance: d });
+					}
+					distances.sort((a, b) => a.distance - b.distance);
+					return distances.slice(0, topologicalNeighbors).map(d => d.boid);
+				}
+
+				getNeighbors(boids) {
+					if (topologicalNeighbors) {
+						return this.getNearestNeighbors(boids);
+					}
+					return boids.filter(other => {
+						if (other === this) return false;
+						const d = p.dist(this.position.x, this.position.y, other.position.x, other.position.y);
+						return d < this.perceptionRadius;
+					});
+				}
+
+				align(neighbors) {
+					let steering = p.createVector();
+					if (neighbors.length === 0) return steering;
+					for (let other of neighbors) steering.add(other.velocity);
+					steering.div(neighbors.length);
+					steering.setMag(this.maxSpeed);
+					steering.sub(this.velocity);
+					steering.limit(this.maxForce);
+					return steering;
+				}
+
+				cohesion(neighbors) {
+					let steering = p.createVector();
+					if (neighbors.length === 0) return steering;
+					for (let other of neighbors) steering.add(other.position);
+					steering.div(neighbors.length);
+					steering.sub(this.position);
+					steering.setMag(this.maxSpeed);
+					steering.sub(this.velocity);
+					steering.limit(this.maxForce);
+					return steering;
+				}
+
+				separation(neighbors) {
+					let steering = p.createVector();
+					if (neighbors.length === 0) return steering;
+					for (let other of neighbors) {
+						const d = p.dist(this.position.x, this.position.y, other.position.x, other.position.y);
+						let diff = p5.Vector.sub(this.position, other.position);
+						diff.div(d * d);
+						steering.add(diff);
+					}
+					steering.div(neighbors.length);
+					steering.setMag(this.maxSpeed);
+					steering.sub(this.velocity);
+					steering.limit(this.maxForce);
+					return steering;
+				}
+
+				interact(target, speed) {
+					let steering = p.createVector();
+					let d = p.dist(this.position.x, this.position.y, target.x, target.y);
+					
+					if (interactionMode === 'dynamic') {
+						const speedThreshold = 10;
+						const influenceRadius = 150;
+						
+						if (d < influenceRadius && speed > 0.5) {
+							if (speed < speedThreshold) {
+								let diff = p5.Vector.sub(target, this.position);
+								diff.setMag(this.maxSpeed * 0.5);
+								steering = diff.sub(this.velocity);
+								steering.limit(this.maxForce * 0.8);
+							} else {
+								let diff = p5.Vector.sub(this.position, target);
+								diff.div(d * d);
+								steering.add(diff);
+								steering.setMag(this.maxSpeed * 2);
+								steering.sub(this.velocity);
+								steering.limit(this.maxForce * 3);
+							}
+						}
+					} else {
+						if (d < 100) {
+							let diff = p5.Vector.sub(this.position, target);
+							diff.div(d * d);
+							steering.add(diff);
+							steering.setMag(this.maxSpeed * 2);
+							steering.sub(this.velocity);
+							steering.limit(this.maxForce * 3);
+						}
+					}
+					return steering;
+				}
+
+				flock(boids, target, speed) {
+					const neighbors = this.getNeighbors(boids);
+					this.acceleration.add(this.align(neighbors));
+					this.acceleration.add(this.cohesion(neighbors));
+					this.acceleration.add(this.separation(neighbors));
+					this.acceleration.add(this.interact(target, speed));
+				}
+
+				update() {
+					this.position.add(this.velocity);
+					this.velocity.add(this.acceleration);
+					this.velocity.limit(this.maxSpeed);
+					this.acceleration.mult(0);
+				}
+
+				show() {
+					p.strokeWeight(4);
+					p.stroke(255, 255, 255, 180);
+					p.point(this.position.x, this.position.y);
+				}
+			}
+
+			p.setup = () => {
+				const w = container.offsetWidth;
+				const h = container.offsetHeight;
+				const canvas = p.createCanvas(w, h);
+				canvas.parent(id);
+				for (let i = 0; i < numBoids; i++) {
+					boids.push(new Boid());
+				}
+				prevMouseX = p.mouseX;
+				prevMouseY = p.mouseY;
+			};
+
+			p.windowResized = () => {
+				const w = container.offsetWidth;
+				const h = container.offsetHeight;
+				p.resizeCanvas(w, h);
+			};
+
+			p.draw = () => {
+				p.background(20, 20, 20);
+				
+				if (interactionMode === 'dynamic') {
+					const dx = p.mouseX - prevMouseX;
+					const dy = p.mouseY - prevMouseY;
+					mouseSpeed = p.sqrt(dx * dx + dy * dy);
+					prevMouseX = p.mouseX;
+					prevMouseY = p.mouseY;
+				}
+				
+				const target = p.createVector(p.mouseX, p.mouseY);
+				
+				for (let boid of boids) {
+					boid.edges();
+					boid.flock(boids, target, mouseSpeed);
+					boid.update();
+					boid.show();
+				}
+			};
+		}, container);
+
+		// Cleanup
+		document.addEventListener('astro:before-swap', () => {
+			if (sketch && sketch.remove) sketch.remove();
+		}, { once: true });
+	};
+
+	// Initialize on load and navigation
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initSketch);
+	} else {
+		initSketch();
+	}
+	
+	document.addEventListener('astro:page-load', initSketch);
+</script>
+
+<style>
+	div > canvas {
+		display: block;
+		width: 100% !important;
+		height: 100% !important;
+	}
+	@media (max-width: 768px) {
+		div {
+			aspect-ratio: 1/1;
+		}
+	}
+</style>
