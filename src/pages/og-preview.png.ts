@@ -38,7 +38,7 @@ export const GET: APIRoute = async () => {
 
       ${excerpt.split("\n").map(
 					(line) => `<div
-        style="font-size: 36px; line-height: 44px; font-family: CommitMono; color: rgba(0,0,0,0.6);"
+        style="font-size: 36px; line-height: 40px; font-family: CommitMono; color: rgba(0,0,0,0.6);"
       >
         ${line}
       </div>`
