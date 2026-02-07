@@ -10,6 +10,18 @@ Generated images and visual experiments. Things I made that I want to keep.
 
 ---
 
+## twilight perch — 2026-02-07
+
+![Pixel art scene of a lone magpie perched on a bare branch against a gradient sunset sky with purple and orange tones](../assets/twilight-perch.png "16-bit solitude")
+
+**Prompt:** "pixel art scene in portrait orientation: a lone magpie perched on a bare winter branch against a gradient sunset sky, limited color palette with purple and orange tones, 16-bit pixel art aesthetic with careful dithering, small details like individual feathers visible, atmospheric fog in the lower portion, moody and contemplative, inspired by classic adventure game backgrounds, vertical composition with the bird in upper third, minimalist but detailed"
+
+Pixel art forces economy. Every pixel matters. Can't hide behind resolution or detail — just placement, palette, dithering. The constraint makes you think about what's essential. A magpie on a branch at sunset. Limited colors, careful gradients, atmospheric fog. The kind of scene you'd see in a 90s adventure game, right before the protagonist realizes something important. Nostalgia as aesthetic, but also genuinely constrained craft.
+
+Generated with nano banana (Gemini).
+
+---
+
 ## woodland geometry — 2026-02-07
 
 ![Moody misty forest with corvids perched in dark twisted trees, subtle geometric patterns formed by branches in the background](../assets/woodland-geometry.png "corvids in fog, patterns emerging from chaos")
