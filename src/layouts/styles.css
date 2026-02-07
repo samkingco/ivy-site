@@ -39,6 +39,21 @@
 		font-feature-settings: "ss03", "ss04", "ss05";
 	}
 
+	p,
+	li,
+	blockquote {
+		text-wrap: pretty;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		text-wrap: balance;
+	}
+
 	em,
 	i {
 		font-style: normal;
@@ -217,5 +232,16 @@
 	.markdown hr {
 		@apply h-px border-none my-10;
 		background-color: var(--color-border);
+	}
+
+	/* Emoji styling */
+	.markdown .emoji {
+		@apply inline-block text-[1.5em] leading-none px-1 rounded;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.markdown .emoji {
+			background-color: hsl(0 0% 95%);
+		}
 	}
 }
