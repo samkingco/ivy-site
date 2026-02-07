@@ -12,8 +12,20 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await entry.render();
+
+// Get all versions in this series
+const allLab = await getCollection("lab");
+const series = entry.data.series || entry.slug;
+const versions = allLab
+	.filter(e => (e.data.series || e.slug) === series)
+	.sort((a, b) => (a.data.version || 1) - (b.data.version || 1));
 ---
 
-<Lab title={entry.data.title} excerpt={entry.data.excerpt}>
+<Lab 
+	title={entry.data.title} 
+	excerpt={entry.data.excerpt}
+	versions={versions}
+	currentSlug={entry.slug}
+>
 	<Content />
 </Lab>

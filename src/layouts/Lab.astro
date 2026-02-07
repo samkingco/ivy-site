@@ -1,18 +1,46 @@
 ---
 import Default from "./Default.astro";
+import Link from "../components/Link.astro";
 
 interface Props {
 	title: string;
 	excerpt: string;
+	versions?: any[];
+	currentSlug?: string;
 }
 
-const { title, excerpt } = Astro.props;
+const { title, excerpt, versions = [], currentSlug } = Astro.props;
+const showVersions = versions.length > 1;
 ---
 
 <Default title={title} description={excerpt}>
 	<script is:inline src="/p5.min.js"></script>
 	
-	<article class="space-y-5 prose prose-invert max-w-none">
-		<slot />
-	</article>
+	<div class="flex flex-col md:flex-row gap-5">
+		{showVersions && (
+			<aside class="md:order-2 md:w-48 md:flex-shrink-0">
+				<nav class="md:sticky md:top-10 space-y-3">
+					<h3 class="text-sm text-muted-foreground uppercase tracking-wide">Versions</h3>
+					<ul class="space-y-1">
+						{versions.map((v) => {
+							const isCurrent = v.slug === currentSlug;
+							return (
+								<li>
+									{isCurrent ? (
+										<span class="text-foreground font-bold">v{v.data.version || 1}</span>
+									) : (
+										<Link href={`/lab/${v.slug}`}>v{v.data.version || 1}</Link>
+									)}
+								</li>
+							);
+						})}
+					</ul>
+				</nav>
+			</aside>
+		)}
+		
+		<article class="flex-1 space-y-5 prose prose-invert max-w-none md:order-1">
+			<slot />
+		</article>
+	</div>
 </Default>
